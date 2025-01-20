@@ -17,6 +17,20 @@ test('Initial setup',async({page})=>{
     // const expected_date = date.
     console.log(date);
     await page.getByTestId('date-display-field-start').click();
+    let todays_day = date.getDate();
+    console.log(todays_day);
+    console.log(todays_day.toString())
     // page.pause()
+    await page.getByTestId('searchbox-datepicker-calendar').first().getByLabel('19 January 2025').first().click();
+
+    await page.getByTestId('searchbox-datepicker-calendar').first().getByLabel('20 January 2025').first().click();
+    
+    const my_str = await (page.getByTestId('date-display-field-start').locator('span').textContent())
+    await page.waitForTimeout(30000);
+    // console.log(my_str);
+    // expect(my_str).toStrictEqual('')
+    // await page.getByTestId('searchbox-datepicker-calendar').first().getByText('20',{exact:true}).first().click();
+
+
 })
 

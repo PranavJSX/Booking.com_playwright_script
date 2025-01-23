@@ -15,6 +15,5 @@ test.beforeAll('Initial setup',async({page})=>{
 
     await page.locator('.fcd9eec8fb').click();
 
-    
 })
 

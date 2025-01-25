@@ -17,7 +17,7 @@ test.beforeEach('initial setup',async ({page})=>{
     })
 })
 
-test('Checking the hotel booking filters',async({page})=>{
+test('Checking the hotel booking filters',async({page,context})=>{
     
     // page.waitForSelector(close_button);
 
@@ -63,7 +63,7 @@ test('Checking the hotel booking filters',async({page})=>{
     if(await page.getByLabel('Dismiss sign in information.').isVisible()){
         await page.getByLabel('Dismiss sign in information.').click();
     }
-    const dropdown = await page.getByTestId('sorters-dropdown');
+    const dropdown = page.getByTestId('sorters-dropdown');
     // const filterList = dropdown.locator('ul > li');
     let counter = 1;
     for (const li of await dropdown.locator('ul>li').all()){
@@ -73,10 +73,19 @@ test('Checking the hotel booking filters',async({page})=>{
         counter++;
         await open_filter_list.click();
     }
-    expect.soft(counter).toBe(10);
+    await expect.soft(counter).toBe(10);
+    const titleOfPlace = await page.getByTestId('title-link').getByTestId('title').first().innerText();
+    console.log(titleOfPlace);
 
-    await page.getByTestId('availability-cta-btn').first().click();
-    page.waitForLoadState();
+
+    const [page2] = await Promise.all([
+        context.waitForEvent('page'),
+        await page.getByTestId('availability-cta-btn').first().click()
+    ])
+    await page2.waitForLoadState();
+    const hotel_name = await page2.locator('#hp_hotel_name').locator('h2').innerText();
+    console.log(hotel_name);
+    expect(titleOfPlace).toBe(hotel_name);
 
 })
 

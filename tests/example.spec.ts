@@ -28,21 +28,27 @@ test('Checking the hotel booking filters',async({page,context})=>{
 
     const months_array = ['January','February','Match','April','May','June','July','August','September','October','November','December'];
     const days_array = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const current_day_of_the_week_string = days_array[date.getDay()-1];
     const curr_month = months_array[date.getMonth()];
     let todays_day = date.getDate();
     let my_selected_date = `${todays_day.toString()} ${curr_month.toString()} ${date.getFullYear()}`
+    await page.addLocatorHandler(page.getByLabel('Dismiss sign in information.'),async()=>{
+        await page.getByLabel('Dismiss sign in information.').click();
+    })
 
 
     await page.getByTestId('date-display-field-start').click();
-    await page.getByTestId('searchbox-datepicker-calendar').first().getByLabel(my_selected_date).click();
+    await page.getByTestId('searchbox-datepicker-calendar').first().getByLabel(my_selected_date).first().click();
 
     todays_day = date.getDate()+1;
     my_selected_date = `${todays_day.toString()} ${curr_month.toString()} ${date.getFullYear()}`
     await page.addLocatorHandler(page.getByLabel('Dismiss sign in information.'),async()=>{
         await page.getByLabel('Dismiss sign in information.').click();
     })
-    await page.getByTestId('searchbox-datepicker-calendar').first().getByLabel(my_selected_date).click();
-    console.log(`Booking end date  --- ` , todays_day);
+    await page.getByTestId('searchbox-datepicker-calendar').first().getByLabel(my_selected_date).first().click();
+
+    console.log('week',days_array[date.getDay()]);
+    console.log('')
 
     const enteredStartDate = await (page.getByTestId('date-display-field-start').locator('span').textContent())
     const enteredEndDate = await (page.getByTestId('date-display-field-end').locator('span').textContent())
@@ -52,7 +58,7 @@ test('Checking the hotel booking filters',async({page,context})=>{
     //Date validation
     expect(enteredStartDate).toContain(todays_day.toString());
 
-    await page.getByPlaceholder('Where are you going?').fill('Pune');
+    await page.getByPlaceholder('Where are you going?').fill('Goa');
     await page.getByRole('button',{name:'Search'}).click();
     await page.waitForLoadState();
 
@@ -64,16 +70,8 @@ test('Checking the hotel booking filters',async({page,context})=>{
         await page.getByLabel('Dismiss sign in information.').click();
     }
     const dropdown = page.getByTestId('sorters-dropdown');
-    // const filterList = dropdown.locator('ul > li');
-    let counter = 1;
-    for (const li of await dropdown.locator('ul>li').all()){
-        await li.click();
-        page.waitForLoadState();
-        console.log(`Loaded ${counter} times .----verifying if the filters are working`);
-        counter++;
-        await open_filter_list.click();
-    }
-    await expect.soft(counter).toBe(10);
+
+    await dropdown.locator('ul>li').last().click();
     const titleOfPlace = await page.getByTestId('title-link').getByTestId('title').first().innerText();
     console.log(titleOfPlace);
 
@@ -82,10 +80,33 @@ test('Checking the hotel booking filters',async({page,context})=>{
         context.waitForEvent('page'),
         await page.getByTestId('availability-cta-btn').first().click()
     ])
-    await page2.waitForLoadState();
+    // await page2.waitForLoadState();
     const hotel_name = await page2.locator('#hp_hotel_name').locator('h2').innerText();
     console.log(hotel_name);
+
     expect(titleOfPlace).toBe(hotel_name);
 
-})
+    
+    console.log('-----Starting the booking process------');
+    await page2.locator('#hp_book_now_button').click();
+    await page2.waitForLoadState();
+    await page2.locator('#hp_book_now_button').click();
+    await page2.getByTestId('user-details-firstname').fill('Mytester');
+    await page2.getByTestId('user-details-lastname').fill('Tester');
+    await page2.getByTestId('user-details-email').fill('test@test.com');
+    await page2.getByTestId('phone-number-input').fill('4242424290');
 
+    await page2.locator('#checkin_eta_hour').selectOption('-1');
+    await page2.getByRole('button',{name:' Next: Final details '}).click();
+
+
+    //Asserting all the fields
+    await page2.waitForLoadState();
+    console.log( await page2.locator('h1').textContent());
+    expect(await page2.locator('h1').textContent()).toBe(hotel_name);
+
+    console.log(await page2.locator('time:nth-of-type(1) > .b80bba4aba.e1eebb6a1e').textContent());
+    let my_selected_date_short = `${current_day_of_the_week_string.toString()}, ${curr_month.slice(0,3).toString()} ${todays_day.toString()}, ${date.getFullYear().toString()}`
+    console.log('My selected date created',my_selected_date_short);
+
+})

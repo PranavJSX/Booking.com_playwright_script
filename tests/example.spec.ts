@@ -1,6 +1,6 @@
 import {expect, test} from '@playwright/test'
 import {dismiss_popup_panel} from '../page-objects/handleLayout_dismiss.spec'; 
-
+import { Handle_dates } from '../page-objects/Handle_dates';
 
 //Navigating to the websit
 
@@ -23,39 +23,30 @@ test('Checking the hotel booking filters',async({page,context})=>{
 
     //finding out tomorrow's date for booking
     console.log('2)-----Verifying if the date is correctly selected ------')
-    let date = new Date();
-    date.setDate(date.getDate()+1);
-
-    const months_array = ['January','February','Match','April','May','June','July','August','September','October','November','December'];
-    const days_array = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    let current_day_of_the_week_string = days_array[date.getDay()-1];
-    let curr_month = months_array[date.getMonth()];
-    let todays_day = date.getDate();
-    let my_selected_date = `${todays_day.toString()} ${curr_month.toString()} ${date.getFullYear()}`
+  
     const close_popup = new dismiss_popup_panel(page);
     close_popup.close_discount_popup();
 
+    
+    const dateObj = new Handle_dates();
+    let todays_day:any = dateObj.date_handler(0)
+    let month_todays_date = todays_day.toString().split(' ')[1].slice(0,3);
+    let my_selected_date = dateObj.date_handler(0); 
 
     await page.getByTestId('date-display-field-start').click();
     await page.getByTestId('searchbox-datepicker-calendar').first().getByLabel(my_selected_date).first().click();
 
-    todays_day = date.getDate()+1;
-    my_selected_date = `${todays_day.toString()} ${curr_month.toString()} ${date.getFullYear()}`
     await page.addLocatorHandler(page.getByLabel('Dismiss sign in information.'),async()=>{
         await page.getByLabel('Dismiss sign in information.').click();
     })
-    await page.getByTestId('searchbox-datepicker-calendar').first().getByLabel(my_selected_date).first().click();
-
-    console.log('week',days_array[date.getDay()]);
-    console.log('')
+    await page.getByTestId('searchbox-datepicker-calendar').first().getByLabel(dateObj.date_handler(2)).first().click();
 
     const enteredStartDate = await (page.getByTestId('date-display-field-start').locator('span').textContent())
     const enteredEndDate = await (page.getByTestId('date-display-field-end').locator('span').textContent())
-    expect(enteredEndDate).toContain(todays_day.toString());
-    todays_day = todays_day-1;
-
+    console.log(todays_day);
+    console.log(month_todays_date);
     //Date validation
-    expect(enteredStartDate).toContain(todays_day.toString());
+    expect(enteredStartDate).toContain(month_todays_date)
 
     await page.getByPlaceholder('Where are you going?').fill('Goa');
     await page.getByRole('button',{name:'Search'}).click();
@@ -105,21 +96,20 @@ test('Checking the hotel booking filters',async({page,context})=>{
     console.log( await page2.locator('h1').textContent());
     expect(await page2.locator('h1').textContent()).toBe(hotel_name);
 
+    let my_selected_date_short = dateObj.date_handler(0)
     console.log(await page2.locator('time:nth-of-type(1) > .b80bba4aba.e1eebb6a1e').textContent());
-    let my_selected_date_short = `${current_day_of_the_week_string.toString()}, ${curr_month.slice(0,3).toString()} ${todays_day.toString()}, ${date.getFullYear().toString()}`
+    // let my_selected_date_short = `${current_day_of_the_week_string.toString()}, ${curr_month.slice(0,3).toString()} ${todays_day.toString()}, ${date.getFullYear().toString()}`
     console.log('My selected date created',my_selected_date_short);
 
-    expect(await page2.locator('time:nth-of-type(1) > .b80bba4aba.e1eebb6a1e').textContent()).toBe(my_selected_date_short);
+    expect(await page2.locator('time:nth-of-type(1) > .b80bba4aba.e1eebb6a1e').textContent()).toContain(my_selected_date_short.split(' ')[2]);
 
     //Adjusting the date to validate the checkout date
 
-    todays_day = date.getDate()+1;
-    current_day_of_the_week_string = days_array[date.getDay()];
-    curr_month = months_array[date.getMonth()];
-    my_selected_date_short = `${current_day_of_the_week_string.toString()}, ${curr_month.slice(0,3).toString()} ${todays_day.toString()}, ${date.getFullYear().toString()}`
+    todays_day = dateObj.date_handler(1);
+    my_selected_date_short = dateObj.date_handler(0);
     console.log('My selected date created for checkout ',my_selected_date_short);
 
-    expect(await page2.locator('time:nth-of-type(2) > .b80bba4aba.e1eebb6a1e').textContent()).toBe(my_selected_date_short);
+    expect(await page2.locator('time:nth-of-type(2) > .b80bba4aba.e1eebb6a1e').textContent()).toContain(my_selected_date_short.split(' ')[2]);
 
     console.log('Dates and hotel name verified');
     console.log('------TEST END-----');

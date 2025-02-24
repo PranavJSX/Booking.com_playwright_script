@@ -8,9 +8,9 @@ export class Handle_dates{
             const days_array = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
             let current_day_of_the_week_string = days_array[date.getDay()-1+howmanydaysforward];
             let curr_month = months_array[date.getMonth()];
-            let todays_day = date.getDate();
+            let todays_day = date.getDate()+howmanydaysforward;
             let my_selected_date = `${todays_day.toString()} ${curr_month.toString()} ${date.getFullYear()}`
             return my_selected_date
 
     }
-}
+}       

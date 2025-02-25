@@ -17,7 +17,7 @@ test.beforeEach('initial setup',async ({page})=>{
     close_popup.close_discount_popup();
 })
 
-test('Checking the hotel booking filters',async({page,context})=>{
+test('Hotel Booking process test',async({page,context})=>{
     
     // page.waitForSelector(close_button);
 

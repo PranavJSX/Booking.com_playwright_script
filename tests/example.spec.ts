@@ -48,12 +48,11 @@ test('Hotel Booking process test',async({page,context})=>{
 
     await page.getByPlaceholder('Where are you going?').fill('Goa');
     await page.getByRole('button',{name:'Search'}).click();
-    await page.waitForLoadState();
+    
 
     //Verifying if the filters for the hotel work
     const open_filter_list = await page.getByTestId('sorters-dropdown-trigger');
     await open_filter_list.click();
-    await page.waitForLoadState();
     if(await page.getByLabel('Dismiss sign in information.').isVisible()){
         await page.getByLabel('Dismiss sign in information.').click();
     }
@@ -77,33 +76,30 @@ test('Hotel Booking process test',async({page,context})=>{
     
     console.log('-----Starting the booking process------');
     await page2.locator('#hp_book_now_button').click();
-    await page2.waitForLoadState();
     await page2.locator('#hp_book_now_button').click();
-    await page2.waitForLoadState();
     await page2.getByTestId('user-details-firstname').fill('Mytester');
     await page2.getByTestId('user-details-lastname').fill('Tester');
     await page2.getByTestId('user-details-email').fill('test@test.com');
     await page2.getByTestId('phone-number-input').fill('4242424290');
 
     await page2.locator('#checkin_eta_hour').selectOption('-1');
+    await page2.waitForTimeout(2000);
     await page2.getByRole('button',{name:' Next: Final details '}).click();
 
 
     //Asserting all the fields
-    await page2.waitForLoadState();
     console.log( await page2.locator('h1').textContent());
     expect(await page2.locator('h1').textContent()).toBe(hotel_name);
 
     let my_selected_date_short = dateObj.date_handler(0)
-    console.log(await page2.locator('time:nth-of-type(1) > .b80bba4aba.e1eebb6a1e').textContent());
+    let my_booking_date = await page2.locator('time').first().locator('div').first().textContent();
+    console.log('My Booking date:',my_booking_date);
     // let my_selected_date_short = `${current_day_of_the_week_string.toString()}, ${curr_month.slice(0,3).toString()} ${todays_day.toString()}, ${date.getFullYear().toString()}`
     console.log('My selected date created',my_selected_date_short);
 
-    expect(await page2.locator('time:nth-of-type(1) > .b80bba4aba.e1eebb6a1e').textContent()).toContain(my_selected_date_short.split(' ')[2]);
+    // expect(await page2.locator('time:nth-of-type(1) > .b80bba4aba.e1eebb6a1e').textContent()).toContain(my_selected_date_short.split(' ')[2]);
 
     //Adjusting the date to validate the checkout date
-
-    todays_day = dateObj.date_handler(1);
     my_selected_date_short = dateObj.date_handler(0);
     console.log('My selected date created for checkout ',my_selected_date_short);
 

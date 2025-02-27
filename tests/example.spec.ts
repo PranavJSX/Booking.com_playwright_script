@@ -31,20 +31,18 @@ test('Hotel Booking process test',async({page,context})=>{
     const dateObj = new Handle_dates();
     let todays_day:any = dateObj.date_handler(0)
     let my_selected_date = dateObj.date_handler(1); 
+    console.log(todays_day);
+    console.log(my_selected_date);
 
     await page.getByTestId('date-display-field-start').click();
-    await page.getByTestId('searchbox-datepicker-calendar').first().getByLabel(my_selected_date).first().click();
+    await page.getByTestId('searchbox-datepicker-calendar').first().getByLabel(todays_day).first().click();   
 
     await page.addLocatorHandler(page.getByLabel('Dismiss sign in information.'),async()=>{
         await page.getByLabel('Dismiss sign in information.').click();
     })
     my_selected_date = dateObj.date_handler(1);
-    await page.getByTestId('searchbox-datepicker-calendar').first().getByLabel(dateObj.date_handler(2)).first().click();
+    await page.getByTestId('searchbox-datepicker-calendar').first().getByLabel(my_selected_date).first().click();
 
-    const enteredStartDate = await (page.getByTestId('date-display-field-start').locator('span').textContent())
-    const enteredEndDate = await (page.getByTestId('date-display-field-end').locator('span').textContent())
-    console.log(todays_day);
-    //Date validation
 
     await page.getByPlaceholder('Where are you going?').fill('Goa');
     await page.getByRole('button',{name:'Search'}).click();
